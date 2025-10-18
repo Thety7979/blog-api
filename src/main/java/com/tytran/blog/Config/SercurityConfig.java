@@ -1,4 +1,4 @@
-package com.tytran.blog.Config;
+package com.tytran.blog.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +13,7 @@ public class SercurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**","/api/user/**").permitAll()
+                        .requestMatchers("/auth/**","/user/**").permitAll()
                         .anyRequest().authenticated());
         return http.build();
     }
