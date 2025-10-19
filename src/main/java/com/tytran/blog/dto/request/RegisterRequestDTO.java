@@ -6,27 +6,30 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class RegisterRequestDTO {
     @Email
-    private String email;
+    String email;
 
-    @Size(min = 8, message = "Password must be at least 8 character")
+    @Size(min = 8, message = "INVALID_PASSWORD")
     @NotEmpty(message = "Password must not be null or empty")
     @NotNull(message = "Password must not be null or empty")
-    private String password;
+    String password;
 
     @NotEmpty(message = "Fullname must not be null or empty")
     @NotNull(message = "Fullname must not be null or empty")
-    private String fullname;
-    
-    private UUID roleId;
+    String fullname;
+
+    UUID roleId;
 }

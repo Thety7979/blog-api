@@ -3,14 +3,16 @@ package com.tytran.blog.services.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.tytran.blog.repository.*;
 import com.tytran.blog.services.RoleService;
 import com.tytran.blog.services.UserService;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+
 import com.tytran.blog.dto.request.ChangePasswordRequestDTO;
 import com.tytran.blog.dto.request.RegisterRequestDTO;
 import com.tytran.blog.dto.request.UserRequestDTO;
@@ -19,15 +21,18 @@ import com.tytran.blog.entity.Role;
 import com.tytran.blog.entity.Users;
 import com.tytran.blog.exception.AppException;
 import com.tytran.blog.exception.ErrorCode;
+import com.tytran.blog.mapper.UserMapper;
 
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserServiceImpl implements UserService {
 
-    @Autowired
-    private UserRepository userDAO;
+    UserRepository userDAO;
 
-    @Autowired
-    private RoleService roleService;
+    RoleService roleService;
+
+    UserMapper userMapper;
 
     @Override
     public Users findByEmail(String email) {
@@ -60,28 +65,24 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO updateUser(UUID userId, UserRequestDTO request) {
-        Users user = userDAO.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        Users user = userDAO.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         if (request.getEmail() != null && !request.getEmail().isEmpty()) {
             user.setEmail(request.getEmail());
         }
-        if(request.getFullname() != null && !request.getFullname().isEmpty()){
+        if (request.getFullname() != null && !request.getFullname().isEmpty()) {
             user.setFullname(request.getFullname());
         }
         user.setUpdated_at(LocalDateTime.now());
         user = userDAO.save(user);
 
-        return UserDTO.builder()
-                .email(user.getEmail())
-                .fullname(user.getFullname())
-                .roleName(user.getRole().getName())
-                .build();
+        return userMapper.userToUserDTO(user);
     }
 
     @Override
     public boolean deleteUser(UUID userId) {
         Users user = userDAO.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id:" + userId));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         userDAO.delete(user);
         return true;
     }
@@ -89,47 +90,29 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDTO> getAllUsers() {
         List<Users> users = userDAO.findAll();
-        List<UserDTO> userDTO = users.stream()
-                .map(user -> new UserDTO(user.getEmail(), user.getFullname(),
-                        user.getRole() != null ? user.getRole().getName() : null))
-                /*
-                 * học thêm một số phương thức trong stream()
-                 * 
-                 * Lọc ra phần tử thỏa điều kiện
-                 * .filter(u -> "admin".equals(u.getRoleName()))
-                 * 
-                 * sắp xếp theo phần tử, như hiện tại là tăng dần từ A->Z, có thể thêm
-                 * .reversed() để sắp xếp ngược lại
-                 * .sorted(Comparator.comparing(UserDTO::getEmail))
-                 */
-                .collect(Collectors.toList());
-        return userDTO;
+        return userMapper.listUserToUserDTO(users);
     }
 
     @Override
     public UserDTO getUserById(UUID userid) {
-        Users user = userDAO.findById(userid).orElseThrow(() -> new RuntimeException("user not found"));
-        return new UserDTO(user.getEmail(), user.getFullname(), user.getRole().getName());
+        Users user = userDAO.findById(userid).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        return userMapper.userToUserDTO(user);
     }
 
     @Override
     public UserDTO changePassword(UUID userId, ChangePasswordRequestDTO request) {
-        Users user = userDAO.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        Users user = userDAO.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         if (request.getCurrentPassword() != null && !request.getCurrentPassword().isEmpty()) {
             if (request.getCurrentPassword().equals(user.getPassword())) {
                 user.setPassword(request.getNewPassword());
                 userDAO.save(user);
-            }else{
+            } else {
                 throw new AppException(ErrorCode.PASSWORD_NOT_TRUE);
             }
         } else {
             throw new AppException(ErrorCode.PASSWORD_NOT_NULL);
         }
-        return UserDTO.builder()
-                .email(user.getEmail())
-                .fullname(user.getFullname())
-                .roleName(user.getRole().getName())
-                .build();
+        return userMapper.userToUserDTO(user);
     }
 
 }

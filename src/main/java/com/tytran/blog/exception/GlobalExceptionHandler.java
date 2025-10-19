@@ -5,7 +5,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.tytran.blog.dto.response.ApiResponse;
+import com.tytran.blog.dto.ApiResponse;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = AppException.class)
-    public ResponseEntity<ApiResponse<ErrorCode>> handlingRunTimeException(AppException exception) {
+    public ResponseEntity<ApiResponse<ErrorCode>> handlingAppException(AppException exception) {
         ErrorCode errorCode = exception.getErrorCode();
         ApiResponse<ErrorCode> apiResponse = new ApiResponse<>();
         apiResponse.setCode(errorCode.getCode());
@@ -28,7 +28,17 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handlingMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
-        return ResponseEntity.badRequest().body(exception.getFieldError().getDefaultMessage());
+    public ResponseEntity<ApiResponse<ErrorCode>> handlingMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+        String enumKey = exception.getFieldError().getDefaultMessage();
+        ErrorCode errorCode;
+        try {
+            errorCode = ErrorCode.valueOf(enumKey);
+        } catch (Exception e) {
+            errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
+        }
+        ApiResponse<ErrorCode> response = new ApiResponse<>();
+        response.setCode(errorCode.getCode());
+        response.setMessage(errorCode.getMessage());
+        return ResponseEntity.badRequest().body(response);
     }
 }

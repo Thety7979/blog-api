@@ -1,17 +1,20 @@
-package com.tytran.blog.dto.response;
+package com.tytran.blog.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ApiResponse<T> {
-    private int code = 1000;
-    private String message;
-    private T result;
+    int code = 1000;
+    String message;
+    T result;
 }

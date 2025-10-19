@@ -1,6 +1,5 @@
 package com.tytran.blog.services.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.tytran.blog.dto.request.RegisterRequestDTO;
@@ -10,11 +9,16 @@ import com.tytran.blog.entity.Users;
 import com.tytran.blog.services.AuthService;
 import com.tytran.blog.services.UserService;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthServiceImpl implements AuthService {
 
-    @Autowired
-    private UserService userService;
+    UserService userService;
 
     @Override
     public AuthResponseDTO Register(RegisterRequestDTO request) {
