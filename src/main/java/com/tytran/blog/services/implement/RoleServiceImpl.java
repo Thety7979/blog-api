@@ -1,4 +1,4 @@
-package com.tytran.blog.services.impl;
+package com.tytran.blog.services.implement;
 
 import java.util.UUID;
 import org.springframework.stereotype.Service;
