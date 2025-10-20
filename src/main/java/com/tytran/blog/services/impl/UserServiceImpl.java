@@ -3,6 +3,9 @@ package com.tytran.blog.services.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.tytran.blog.repository.*;
@@ -45,22 +48,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Users saveUser(RegisterRequestDTO request) {
+    public UserDTO saveUser(RegisterRequestDTO request) {
         if (userDAO.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
         Role role = roleService.findById(request.getRoleId());
 
+        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+
         Users user = Users.builder()
                 .email(request.getEmail())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .fullname(request.getFullname())
                 .created_at(LocalDateTime.now())
+                .updated_at(LocalDateTime.now())
                 .role(role)
                 .build();
         user = userDAO.save(user);
 
-        return user;
+        return userMapper.userToUserDTO(user);
     }
 
     @Override
@@ -105,6 +111,7 @@ public class UserServiceImpl implements UserService {
         if (request.getCurrentPassword() != null && !request.getCurrentPassword().isEmpty()) {
             if (request.getCurrentPassword().equals(user.getPassword())) {
                 user.setPassword(request.getNewPassword());
+                user.setUpdated_at(LocalDateTime.now());
                 userDAO.save(user);
             } else {
                 throw new AppException(ErrorCode.PASSWORD_NOT_TRUE);

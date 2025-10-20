@@ -18,7 +18,7 @@ public interface UserService {
 
     boolean existsByEmail(String email);
 
-    Users saveUser(RegisterRequestDTO request);
+    UserDTO saveUser(RegisterRequestDTO request);
 
     UserDTO updateUser(UUID userId, UserRequestDTO request);
 

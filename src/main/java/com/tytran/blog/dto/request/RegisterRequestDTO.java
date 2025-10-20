@@ -19,7 +19,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RegisterRequestDTO {
-    @Email
+    @Email(message = "INVALID_EMAIL_FORMAT")
     String email;
 
     @Size(min = 8, message = "INVALID_PASSWORD")
