@@ -2,6 +2,7 @@ package com.tytran.blog.entity;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
@@ -49,6 +50,8 @@ public class Users {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")
     private Role role;
+
+    private Set<String> roles;
 
     @OneToMany(mappedBy = "user")
     private List<Posts> posts;

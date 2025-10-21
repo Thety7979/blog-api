@@ -10,12 +10,14 @@ import com.tytran.blog.dto.response.UserDTO;
 import com.tytran.blog.services.UserService;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/user")
+@Slf4j
 public class UserController {
 
     @Autowired
@@ -32,6 +35,9 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<UserDTO>>> getUsers() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.info(authentication.getName());
+        authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
         List<UserDTO> list = userService.getAllUsers();
         ApiResponse<List<UserDTO>> response = new ApiResponse<>();
         response.setResult(list);

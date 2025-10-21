@@ -1,10 +1,10 @@
 package com.tytran.blog.services.implement;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +37,8 @@ public class UserServiceImpl implements UserService {
 
     UserMapper userMapper;
 
+    PasswordEncoder passwordEncoder;
+
     @Override
     public Users findByEmail(String email) {
         return userDAO.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
@@ -54,7 +56,8 @@ public class UserServiceImpl implements UserService {
         }
         Role role = roleService.findById(request.getRoleId());
 
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
+        HashSet<String> roles = new HashSet<>();
+        roles.add(com.tytran.blog.enums.Role.USER.name());
 
         Users user = Users.builder()
                 .email(request.getEmail())
@@ -63,6 +66,7 @@ public class UserServiceImpl implements UserService {
                 .created_at(LocalDateTime.now())
                 .updated_at(LocalDateTime.now())
                 .role(role)
+                .roles(roles)
                 .build();
         user = userDAO.save(user);
 

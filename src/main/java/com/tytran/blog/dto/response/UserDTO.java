@@ -1,5 +1,7 @@
 package com.tytran.blog.dto.response;
 
+import java.util.Set;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,4 +18,5 @@ public class UserDTO {
     String email;
     String fullname;
     String roleName;
+    Set<String> roles;
 }
