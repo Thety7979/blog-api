@@ -3,6 +3,7 @@ package com.tytran.blog.services.implement;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -54,10 +55,8 @@ public class UserServiceImpl implements UserService {
         if (userDAO.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-        Role role = roleService.findById(request.getRoleId());
 
-        HashSet<String> roles = new HashSet<>();
-        roles.add(com.tytran.blog.enums.Role.USER.name());
+        Role role = roleService.findById(request.getRoleId());
 
         Users user = Users.builder()
                 .email(request.getEmail())
@@ -66,7 +65,7 @@ public class UserServiceImpl implements UserService {
                 .created_at(LocalDateTime.now())
                 .updated_at(LocalDateTime.now())
                 .role(role)
-                .roles(roles)
+                .roles(new HashSet<String>(Set.of(com.tytran.blog.enums.Role.USER.name())))
                 .build();
         user = userDAO.save(user);
 
