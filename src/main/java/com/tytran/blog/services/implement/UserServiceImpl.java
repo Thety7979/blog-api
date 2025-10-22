@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -103,17 +105,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public UserDTO getUserById(UUID userid) {
         Users user = userDAO.findById(userid).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.userToUserDTO(user);
     }
 
     @Override
-    public UserDTO changePassword(UUID userId, ChangePasswordRequestDTO request) {
-        Users user = userDAO.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+    public UserDTO changePassword(ChangePasswordRequestDTO request) {
+        var securityContext = SecurityContextHolder.getContext();
+        String name = securityContext.getAuthentication().getName();
+        Users user = userDAO.findByEmail(name).orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
         if (request.getCurrentPassword() != null && !request.getCurrentPassword().isEmpty()) {
-            if (request.getCurrentPassword().equals(user.getPassword())) {
-                user.setPassword(request.getNewPassword());
+            boolean isPasswordMatch = passwordEncoder.matches(request.getCurrentPassword(), user.getPassword());
+            if (isPasswordMatch) {
+                user.setPassword(passwordEncoder.encode(request.getNewPassword()));
                 user.setUpdated_at(LocalDateTime.now());
                 userDAO.save(user);
             } else {
@@ -122,6 +128,14 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new AppException(ErrorCode.PASSWORD_NOT_NULL);
         }
+        return userMapper.userToUserDTO(user);
+    }
+
+    @Override
+    public UserDTO me() {
+        var securityContextHolder = SecurityContextHolder.getContext();
+        String name = securityContextHolder.getAuthentication().getName();
+        Users user = userDAO.findByEmail(name).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.userToUserDTO(user);
     }
 

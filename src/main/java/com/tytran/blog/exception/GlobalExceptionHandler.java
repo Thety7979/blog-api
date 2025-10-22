@@ -1,6 +1,7 @@
 package com.tytran.blog.exception;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,7 +16,7 @@ public class GlobalExceptionHandler {
         ApiResponse<ErrorCode> response = new ApiResponse<>();
         response.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
         response.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
-        return ResponseEntity.badRequest().body(response);
+        return ResponseEntity.status(ErrorCode.UNCATEGORIZED_EXCEPTION.getHttpStatus()).body(response);
     }
 
     @ExceptionHandler(value = AppException.class)
@@ -24,7 +25,16 @@ public class GlobalExceptionHandler {
         ApiResponse<ErrorCode> apiResponse = new ApiResponse<>();
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
-        return ResponseEntity.badRequest().body(apiResponse);
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(apiResponse);
+    }
+
+    @ExceptionHandler(value = AuthorizationDeniedException.class)
+    public ResponseEntity<ApiResponse<ErrorCode>> handlingAuthorizationDeniedException(AuthorizationDeniedException exception){
+        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+        ApiResponse<ErrorCode> response = new ApiResponse<>();
+        response.setCode(errorCode.getCode());
+        response.setMessage(errorCode.getMessage());
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
@@ -39,6 +49,6 @@ public class GlobalExceptionHandler {
         ApiResponse<ErrorCode> response = new ApiResponse<>();
         response.setCode(errorCode.getCode());
         response.setMessage(errorCode.getMessage());
-        return ResponseEntity.badRequest().body(response);
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
 }

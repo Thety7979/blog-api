@@ -22,7 +22,9 @@ public interface UserService {
 
     UserDTO updateUser(UUID userId, UserRequestDTO request);
 
-    UserDTO changePassword(UUID userId, ChangePasswordRequestDTO request);
+    UserDTO changePassword(ChangePasswordRequestDTO request);
 
     boolean deleteUser(UUID userId);
+
+    UserDTO me();
 }

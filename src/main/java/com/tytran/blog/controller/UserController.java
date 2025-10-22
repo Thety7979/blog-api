@@ -17,6 +17,8 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,12 +30,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RestController
 @RequestMapping("/user")
 @Slf4j
+@EnableMethodSecurity
 public class UserController {
 
     @Autowired
     private UserService userService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<UserDTO>>> getUsers() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         log.info(authentication.getName());
@@ -45,7 +49,8 @@ public class UserController {
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<ApiResponse<UserDTO>> updateUser(@PathVariable UUID userId, @RequestBody @Valid UserRequestDTO requestDTO) {
+    public ResponseEntity<ApiResponse<UserDTO>> updateUser(@PathVariable UUID userId,
+            @RequestBody @Valid UserRequestDTO requestDTO) {
         ApiResponse<UserDTO> response = new ApiResponse<>();
         response.setResult(userService.updateUser(userId, requestDTO));
         return ResponseEntity.ok(response);
@@ -59,16 +64,25 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable UUID userId) {
-        UserDTO response = userService.getUserById(userId);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<ApiResponse<UserDTO>> getUserById(@PathVariable UUID userId) {
+        ApiResponse<UserDTO> response = new ApiResponse<>();
+        response.setResult(userService.getUserById(userId));
+        return ResponseEntity.ok().body(response);
     }
 
-    @PutMapping("/change-password/{userId}")
-    public ResponseEntity<UserDTO> changePassword(@PathVariable UUID userId,
+    @PutMapping("/change-password")
+    public ResponseEntity<ApiResponse<UserDTO>> changePassword(
             @RequestBody @Valid ChangePasswordRequestDTO requestDTO) {
-        UserDTO response = userService.changePassword(userId, requestDTO);
-        return ResponseEntity.ok(response);
+        ApiResponse<UserDTO> response = new ApiResponse<>();
+        response.setResult(userService.changePassword(requestDTO));
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<UserDTO>> me() {
+        ApiResponse<UserDTO> response = new ApiResponse<>();
+        response.setResult(userService.me());
+        return ResponseEntity.ok().body(response);
     }
 
 }

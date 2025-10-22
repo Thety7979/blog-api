@@ -1,6 +1,7 @@
 package com.tytran.blog.dto.response;
 
 import java.util.Set;
+import java.util.UUID;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserDTO {
+    UUID id;
     String email;
     String fullname;
     String roleName;

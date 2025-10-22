@@ -25,7 +25,7 @@ import lombok.experimental.NonFinal;
 @EnableWebSecurity
 public class SercurityConfig {
 
-    private final String[] PUBLIC_ENDPOINT = { "/auth/**" };
+    private final String[] PUBLIC_ENDPOINT = { "/auth/**", "/user/change-password" };
 
     @NonFinal
     @Value("${jwt.signerKey}")

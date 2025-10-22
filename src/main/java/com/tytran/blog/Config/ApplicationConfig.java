@@ -2,6 +2,7 @@ package com.tytran.blog.config;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +28,7 @@ public class ApplicationConfig {
     ApplicationRunner applicationRunner(UserRepository userRepository) {
         return args -> {
             if (userRepository.findByEmail("admin@gmail.com").isEmpty()) {
-                var roles = new HashSet<String>();
+                Set<String> roles = new HashSet<String>();
                 roles.add(Role.ADMIN.name());
                 Users user = Users.builder()
                         .email("admin@gmail.com")
