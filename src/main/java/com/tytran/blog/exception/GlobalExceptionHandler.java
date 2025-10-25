@@ -1,5 +1,6 @@
 package com.tytran.blog.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -46,6 +47,15 @@ public class GlobalExceptionHandler {
         } catch (Exception e) {
             errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
         }
+        ApiResponse<ErrorCode> response = new ApiResponse<>();
+        response.setCode(errorCode.getCode());
+        response.setMessage(errorCode.getMessage());
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
+    }
+
+    @ExceptionHandler(value = DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<ErrorCode>> handlingDataIntegrityViolationException(DataIntegrityViolationException exception){
+        ErrorCode errorCode = ErrorCode.ROLE_EXISTS;
         ApiResponse<ErrorCode> response = new ApiResponse<>();
         response.setCode(errorCode.getCode());
         response.setMessage(errorCode.getMessage());

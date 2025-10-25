@@ -38,17 +38,23 @@ public class SercurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINT).permitAll()
                         .requestMatchers(HttpMethod.GET, "/user").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, "/permission").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/permission").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/permission/{id}").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/role").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/role").permitAll()
+                        .requestMatchers(HttpMethod.DELETE, "/role/{id}").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer.decoder(JwtDecoder())
-                .jwtAuthenticationConverter(jwtAuthenticationConverter())
-                ));
+                        .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         return http.build();
     }
 
     @Bean
-    JwtAuthenticationConverter jwtAuthenticationConverter(){
+    JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
@@ -64,7 +70,7 @@ public class SercurityConfig {
     }
 
     @Bean
-    PasswordEncoder passwordEncoder(){
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }

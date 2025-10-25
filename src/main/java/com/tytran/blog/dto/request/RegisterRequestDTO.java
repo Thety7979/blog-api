@@ -1,6 +1,5 @@
 package com.tytran.blog.dto.request;
 
-import java.util.UUID;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -30,6 +29,4 @@ public class RegisterRequestDTO {
     @NotEmpty(message = "Fullname must not be null or empty")
     @NotNull(message = "Fullname must not be null or empty")
     String fullname;
-
-    UUID roleId;
 }

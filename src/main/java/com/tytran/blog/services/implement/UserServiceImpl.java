@@ -3,16 +3,13 @@ package com.tytran.blog.services.implement;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.tytran.blog.repository.*;
-import com.tytran.blog.services.RoleService;
 import com.tytran.blog.services.UserService;
 
 import lombok.AccessLevel;
@@ -36,11 +33,11 @@ public class UserServiceImpl implements UserService {
 
     UserRepository userDAO;
 
-    RoleService roleService;
-
     UserMapper userMapper;
 
     PasswordEncoder passwordEncoder;
+
+    RoleRepository roleRepository;
 
     @Override
     public Users findByEmail(String email) {
@@ -58,16 +55,13 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
-        Role role = roleService.findById(request.getRoleId());
-
         Users user = Users.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .fullname(request.getFullname())
                 .created_at(LocalDateTime.now())
                 .updated_at(LocalDateTime.now())
-                .role(role)
-                .roles(new HashSet<String>(Set.of(com.tytran.blog.enums.Role.USER.name())))
+                // .roles(new HashSet<String>(Set.of(com.tytran.blog.enums.Role.USER.name())))
                 .build();
         user = userDAO.save(user);
 
@@ -85,6 +79,8 @@ public class UserServiceImpl implements UserService {
             user.setFullname(request.getFullname());
         }
         user.setUpdated_at(LocalDateTime.now());
+        List<Role> roles = roleRepository.findAllByNameIn(request.getRoles());
+        user.setRoles(new HashSet<>(roles));
         user = userDAO.save(user);
 
         return userMapper.userToUserDTO(user);
@@ -101,14 +97,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDTO> getAllUsers() {
         List<Users> users = userDAO.findAll();
-        return userMapper.listUserToUserDTO(users);
+        return users.stream().map(user -> userMapper.userToUserDTO(user)).toList();
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
     public UserDTO getUserById(UUID userid) {
-        Users user = userDAO.findById(userid).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        return userMapper.userToUserDTO(user);
+        var securityContext = SecurityContextHolder.getContext();
+        String context = securityContext.getAuthentication().getName();
+        Users userId = userDAO.findById(userid).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        Users userContext = userDAO.findByEmail(context).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        userContext.getId();
+        if (userId != userContext) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        return userMapper.userToUserDTO(userId);
     }
 
     @Override

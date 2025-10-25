@@ -1,5 +1,7 @@
 package com.tytran.blog.dto.request;
 
+import java.util.List;
+
 import jakarta.validation.constraints.Email;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -15,4 +17,5 @@ public class UserRequestDTO {
     @Email(message = "INVALID_EMAIL_FORMAT")
     String email;
     String fullname;
+    List<String> roles;
 }

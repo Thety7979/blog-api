@@ -1,6 +1,5 @@
 package com.tytran.blog.dto.response;
 
-import java.util.Set;
 import java.util.UUID;
 
 import lombok.AccessLevel;
@@ -11,13 +10,12 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserDTO {
+public class PermissionResponseDTO {
     UUID id;
-    String email;
-    String fullname;
-    Set<RoleResponseDTO> roles;
+    String name;
+    String description;
 }

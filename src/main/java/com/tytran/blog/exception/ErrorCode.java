@@ -16,7 +16,12 @@ public enum ErrorCode {
     INVALID_EMAIL_FORMAT(1005, "Invalid email format", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1006, "Invalid password", HttpStatus.BAD_REQUEST),
     UNAUTHENTICATED(1007, "Unauthorization", HttpStatus.UNAUTHORIZED),
-    UNAUTHORIZED(1008, "Unauthorized", HttpStatus.FORBIDDEN);
+    UNAUTHORIZED(1008, "Unauthorized", HttpStatus.FORBIDDEN),
+    PERMISSION_NOT_FOUND(1009, "Permission not found", HttpStatus.NOT_FOUND),
+    ROLE_NOT_FOUND(1010, "Role not found", HttpStatus.NOT_FOUND),
+    ROLE_EXISTS(1011, "Role exists", HttpStatus.BAD_REQUEST),
+    PERMISSION_NOT_EXISTS(1012, "Permission not exists", HttpStatus.BAD_REQUEST)
+    ;
 
     private int code;
     private String message;
