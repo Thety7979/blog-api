@@ -21,7 +21,7 @@ public class RegisterRequestDTO {
     @Email(message = "INVALID_EMAIL_FORMAT")
     String email;
 
-    @Size(min = 8, message = "INVALID_PASSWORD")
+    @Size(min = 7, message = "INVALID_PASSWORD")
     @NotEmpty(message = "Password must not be null or empty")
     @NotNull(message = "Password must not be null or empty")
     String password;

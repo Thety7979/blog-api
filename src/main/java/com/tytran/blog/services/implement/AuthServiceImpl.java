@@ -1,9 +1,11 @@
 package com.tytran.blog.services.implement;
 
+import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -13,17 +15,25 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import com.tytran.blog.dto.request.AuthRequestDTO;
+import com.tytran.blog.dto.request.IntrospectRequestDTO;
+import com.tytran.blog.dto.request.LogoutRequestDTO;
 import com.tytran.blog.dto.request.RegisterRequestDTO;
 import com.tytran.blog.dto.response.AuthResponseDTO;
+import com.tytran.blog.dto.response.IntrospectResponseDTO;
 import com.tytran.blog.dto.response.UserDTO;
+import com.tytran.blog.entity.InvalidatedToken;
 import com.tytran.blog.entity.Users;
 import com.tytran.blog.exception.AppException;
 import com.tytran.blog.exception.ErrorCode;
 import com.tytran.blog.mapper.UserMapper;
+import com.tytran.blog.repository.InvalidatedTokenRepository;
 import com.tytran.blog.repository.UserRepository;
 import com.tytran.blog.services.AuthService;
 import com.tytran.blog.services.UserService;
@@ -37,6 +47,8 @@ import lombok.experimental.NonFinal;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthServiceImpl implements AuthService {
+
+    InvalidatedTokenRepository invalidatedTokenRepository;
 
     UserService userService;
 
@@ -56,6 +68,19 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public IntrospectResponseDTO introspect(IntrospectRequestDTO request) throws JOSEException, ParseException {
+        Boolean isvalid = true;
+        try {
+            verifyToken(request.getToken());
+        } catch (Exception e) {
+            isvalid = false;
+        }
+        return IntrospectResponseDTO.builder()
+                .valid(isvalid)
+                .build();
+    }
+
+    @Override
     public AuthResponseDTO Login(AuthRequestDTO request) {
         Users user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -69,6 +94,32 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    @Override
+    public Boolean Logout(LogoutRequestDTO requestDTO) throws JOSEException, ParseException {
+        var signToken = verifyToken(requestDTO.getToken());
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(signToken.getJWTClaimsSet().getJWTID())
+                .expiryTime(signToken.getJWTClaimsSet().getExpirationTime())
+                .build();
+        invalidatedTokenRepository.save(invalidatedToken);
+        return true;
+    }
+
+    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        var verified = signedJWT.verify(verifier);
+        if (!verified && expiryTime.before(new Date())) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+        Boolean checkExists = invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID());
+        if (checkExists) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+        return signedJWT;
+    }
+
     private String generateToken(Users user) {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
@@ -79,6 +130,7 @@ public class AuthServiceImpl implements AuthService {
                 .expirationTime(new Date(
                         Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
                 .claim("scope", buildScope(user))
+                .jwtID(UUID.randomUUID().toString())
                 .build();
 
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
