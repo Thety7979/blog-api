@@ -12,4 +12,6 @@ public interface RoleService {
     List<RoleResponseDTO> getAllRole();
 
     Boolean delete(UUID id);
+
+    RoleResponseDTO update(UUID id, RoleRequestDTO requestDTO);
 }

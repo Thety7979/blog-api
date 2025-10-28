@@ -20,7 +20,7 @@ public interface UserService {
 
     UserDTO saveUser(RegisterRequestDTO request);
 
-    UserDTO updateUser(UUID userId, UserRequestDTO request);
+    UserDTO updateUser(UUID id, UserRequestDTO request);
 
     UserDTO changePassword(ChangePasswordRequestDTO request);
 

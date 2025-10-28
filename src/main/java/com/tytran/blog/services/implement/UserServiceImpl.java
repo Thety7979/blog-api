@@ -3,6 +3,7 @@ package com.tytran.blog.services.implement;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -55,35 +56,39 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
-        Users user = Users.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .fullname(request.getFullname())
-                .created_at(LocalDateTime.now())
-                .updated_at(LocalDateTime.now())
-                // .roles(new HashSet<String>(Set.of(com.tytran.blog.enums.Role.USER.name())))
-                .build();
+        Set<Role> role = roleRepository.findByName(com.tytran.blog.enums.Role.ADMIN.name());
+
+        Users user = userMapper.toUser(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setCreated_at(LocalDateTime.now());
+        user.setUpdated_at(LocalDateTime.now());
+        user.setRoles(role);
         user = userDAO.save(user);
 
         return userMapper.userToUserDTO(user);
     }
 
     @Override
-    public UserDTO updateUser(UUID userId, UserRequestDTO request) {
-        Users user = userDAO.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-
+    public UserDTO updateUser(UUID id, UserRequestDTO request) {
+        var context = SecurityContextHolder.getContext().getAuthentication().getName();
+        Users userContext = userDAO.findByEmail(context).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        userContext.getId();
+        Users userId = userDAO.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        if (userContext != userId) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
         if (request.getEmail() != null && !request.getEmail().isEmpty()) {
-            user.setEmail(request.getEmail());
+            userId.setEmail(request.getEmail());
         }
         if (request.getFullname() != null && !request.getFullname().isEmpty()) {
-            user.setFullname(request.getFullname());
+            userId.setFullname(request.getFullname());
         }
-        user.setUpdated_at(LocalDateTime.now());
+        userId.setUpdated_at(LocalDateTime.now());
         List<Role> roles = roleRepository.findAllByNameIn(request.getRoles());
-        user.setRoles(new HashSet<>(roles));
-        user = userDAO.save(user);
+        userId.setRoles(new HashSet<>(roles));
+        userId = userDAO.save(userId);
 
-        return userMapper.userToUserDTO(user);
+        return userMapper.userToUserDTO(userId);
     }
 
     @Override

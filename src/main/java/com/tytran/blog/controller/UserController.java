@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -39,20 +38,17 @@ public class UserController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<UserDTO>>> getUsers() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info(authentication.getName());
-        authentication.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
         List<UserDTO> list = userService.getAllUsers();
         ApiResponse<List<UserDTO>> response = new ApiResponse<>();
         response.setResult(list);
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{userId}")
-    public ResponseEntity<ApiResponse<UserDTO>> updateUser(@PathVariable UUID userId,
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<UserDTO>> updateUser(@PathVariable UUID id,
             @RequestBody @Valid UserRequestDTO requestDTO) {
         ApiResponse<UserDTO> response = new ApiResponse<>();
-        response.setResult(userService.updateUser(userId, requestDTO));
+        response.setResult(userService.updateUser(id, requestDTO));
         return ResponseEntity.ok(response);
     }
 

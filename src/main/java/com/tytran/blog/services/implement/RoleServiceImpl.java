@@ -55,4 +55,19 @@ public class RoleServiceImpl implements RoleService {
         return true;
     }
 
+    @Override
+    public RoleResponseDTO update(UUID id, RoleRequestDTO requestDTO) {
+        Role role = roleDAO.findById(id).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+        var permission = permissionRepository.findAllByNameIn(requestDTO.getPermissions());
+        if (!requestDTO.getName().isEmpty() && requestDTO.getName() != null) {
+            role.setName(requestDTO.getName());
+        }
+        if (!requestDTO.getDescription().isEmpty() && requestDTO.getDescription() != null) {
+            role.setDescription(requestDTO.getDescription());
+        }
+        role.setPermission(permission);
+        role = roleDAO.save(role);
+        return roleMapper.toDTO(role);
+    }
+
 }

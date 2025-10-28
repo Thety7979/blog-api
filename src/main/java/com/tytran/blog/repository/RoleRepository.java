@@ -1,6 +1,7 @@
 package com.tytran.blog.repository;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +13,6 @@ import com.tytran.blog.entity.Role;
 @Repository
 public interface RoleRepository extends JpaRepository<Role, UUID>, JpaSpecificationExecutor<Role> {
     List<Role> findAllByNameIn(List<String> name);
+
+    Set<Role> findByName(String name);
 }

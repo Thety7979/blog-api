@@ -8,9 +8,11 @@ import com.tytran.blog.dto.ApiResponse;
 import com.tytran.blog.dto.request.AuthRequestDTO;
 import com.tytran.blog.dto.request.IntrospectRequestDTO;
 import com.tytran.blog.dto.request.LogoutRequestDTO;
+import com.tytran.blog.dto.request.RefreshTokenRequestDTO;
 import com.tytran.blog.dto.request.RegisterRequestDTO;
 import com.tytran.blog.dto.response.AuthResponseDTO;
 import com.tytran.blog.dto.response.IntrospectResponseDTO;
+import com.tytran.blog.dto.response.RefreshTokenResponseDTO;
 import com.tytran.blog.dto.response.UserDTO;
 import com.tytran.blog.services.AuthService;
 
@@ -48,17 +50,27 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Boolean>> Logout(@RequestBody LogoutRequestDTO requestDTO) throws JOSEException, ParseException{
+    public ResponseEntity<ApiResponse<Boolean>> Logout(@RequestBody LogoutRequestDTO requestDTO)
+            throws JOSEException, ParseException {
         ApiResponse<Boolean> response = new ApiResponse<>();
         response.setResult(authService.Logout(requestDTO));
         return ResponseEntity.ok().body(response);
     }
-    
+
     @PostMapping("/introspect")
-    public ResponseEntity<ApiResponse<IntrospectResponseDTO>> introspect(@RequestBody IntrospectRequestDTO requestDTO) throws JOSEException, ParseException {
+    public ResponseEntity<ApiResponse<IntrospectResponseDTO>> introspect(@RequestBody IntrospectRequestDTO requestDTO)
+            throws JOSEException, ParseException {
         ApiResponse<IntrospectResponseDTO> response = new ApiResponse<>();
         response.setResult(authService.introspect(requestDTO));
         return ResponseEntity.ok().body(response);
     }
-    
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<RefreshTokenResponseDTO>> refreshToken(
+            @RequestBody RefreshTokenRequestDTO requestDTO) throws JOSEException, ParseException {
+        ApiResponse<RefreshTokenResponseDTO> response = new ApiResponse<>();
+        response.setResult(authService.refreshToken(requestDTO));
+        return ResponseEntity.ok().body(response);
+    }
+
 }

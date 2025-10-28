@@ -24,9 +24,11 @@ import com.nimbusds.jwt.SignedJWT;
 import com.tytran.blog.dto.request.AuthRequestDTO;
 import com.tytran.blog.dto.request.IntrospectRequestDTO;
 import com.tytran.blog.dto.request.LogoutRequestDTO;
+import com.tytran.blog.dto.request.RefreshTokenRequestDTO;
 import com.tytran.blog.dto.request.RegisterRequestDTO;
 import com.tytran.blog.dto.response.AuthResponseDTO;
 import com.tytran.blog.dto.response.IntrospectResponseDTO;
+import com.tytran.blog.dto.response.RefreshTokenResponseDTO;
 import com.tytran.blog.dto.response.UserDTO;
 import com.tytran.blog.entity.InvalidatedToken;
 import com.tytran.blog.entity.Users;
@@ -42,10 +44,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     InvalidatedTokenRepository invalidatedTokenRepository;
@@ -62,6 +66,14 @@ public class AuthServiceImpl implements AuthService {
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
 
+    @NonFinal
+    @Value("${jwt.valid-duration}")
+    protected Long VALID_DURATION;
+
+    @NonFinal
+    @Value("${jwt.refreshable-duration}")
+    protected Long REFRESHABLE_DURATION;
+
     @Override
     public UserDTO Register(RegisterRequestDTO request) {
         return userService.saveUser(request);
@@ -71,7 +83,7 @@ public class AuthServiceImpl implements AuthService {
     public IntrospectResponseDTO introspect(IntrospectRequestDTO request) throws JOSEException, ParseException {
         Boolean isvalid = true;
         try {
-            verifyToken(request.getToken());
+            verifyToken(request.getToken(), false);
         } catch (Exception e) {
             isvalid = false;
         }
@@ -96,21 +108,28 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Boolean Logout(LogoutRequestDTO requestDTO) throws JOSEException, ParseException {
-        var signToken = verifyToken(requestDTO.getToken());
-        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                .id(signToken.getJWTClaimsSet().getJWTID())
-                .expiryTime(signToken.getJWTClaimsSet().getExpirationTime())
-                .build();
-        invalidatedTokenRepository.save(invalidatedToken);
+        try {
+            var signToken = verifyToken(requestDTO.getToken(), true);
+            InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                    .id(signToken.getJWTClaimsSet().getJWTID())
+                    .expiryTime(signToken.getJWTClaimsSet().getExpirationTime())
+                    .build();
+            invalidatedTokenRepository.save(invalidatedToken);
+        } catch (AppException e) {
+            log.info("Token already expiry");
+        }
         return true;
     }
 
-    private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+    private SignedJWT verifyToken(String token, Boolean isRefresh) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        Date expiryTime = (isRefresh)
+                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime().toInstant()
+                        .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS).toEpochMilli())
+                : signedJWT.getJWTClaimsSet().getExpirationTime();
         var verified = signedJWT.verify(verifier);
-        if (!verified && expiryTime.before(new Date())) {
+        if (!verified || expiryTime.before(new Date())) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
         Boolean checkExists = invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID());
@@ -128,7 +147,7 @@ public class AuthServiceImpl implements AuthService {
                 .issuer("tytran.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
+                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .claim("scope", buildScope(user))
                 .jwtID(UUID.randomUUID().toString())
                 .build();
@@ -156,6 +175,24 @@ public class AuthServiceImpl implements AuthService {
             });
         }
         return stringJoiner.toString();
+    }
+
+    @Override
+    public RefreshTokenResponseDTO refreshToken(RefreshTokenRequestDTO request) throws JOSEException, ParseException {
+        var signedToken = verifyToken(request.getToken(), true);
+        var jwtId = signedToken.getJWTClaimsSet().getJWTID();
+        var expiryTime = signedToken.getJWTClaimsSet().getExpirationTime();
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jwtId)
+                .expiryTime(expiryTime)
+                .build();
+        invalidatedTokenRepository.save(invalidatedToken);
+        String email = signedToken.getJWTClaimsSet().getSubject();
+        Users user = userService.findByEmail(email);
+        String refreshToken = generateToken(user);
+        return RefreshTokenResponseDTO.builder()
+                .Token(refreshToken)
+                .build();
     }
 
 }

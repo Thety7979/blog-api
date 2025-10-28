@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,6 +33,7 @@ public class PermissionController {
     PermissionService permissionService;
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<PermissionResponseDTO>> save(@RequestBody PermissionRequestDTO requestDTO) {
         ApiResponse<PermissionResponseDTO> response = new ApiResponse<>();
         response.setResult(permissionService.save(requestDTO));
@@ -39,6 +41,7 @@ public class PermissionController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<PermissionResponseDTO>>> getPermission() {
         ApiResponse<List<PermissionResponseDTO>> response = new ApiResponse<>();
         response.setResult(permissionService.getAllPermission());
@@ -46,6 +49,7 @@ public class PermissionController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable UUID id){
         ApiResponse<Boolean> response = new ApiResponse<>();
         response.setResult(permissionService.delete(id));
