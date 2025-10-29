@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import com.tytran.blog.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 
 @Transactional
 @Service
@@ -29,12 +31,16 @@ public class InitService {
 
     RoleRepository roleRepository;
 
+    @NonFinal
+    @Value("${admin.password}")
+    protected String ADMIN_PASSWORD;
+
     public void createUserAdmin() {
         if (userRepository.findByEmail("admin@gmail.com").isEmpty()) {
             List<Role> role = roleRepository.findAllByNameIn(List.of("ADMIN"));
             Users user = Users.builder()
                     .email("admin@gmail.com")
-                    .password(passwordEncoder.encode("admin"))
+                    .password(passwordEncoder.encode(ADMIN_PASSWORD))
                     .fullname("Admin")
                     .created_at(LocalDateTime.now())
                     .updated_at(LocalDateTime.now())

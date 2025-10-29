@@ -1,5 +1,6 @@
 package com.tytran.blog.dto.request;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.validation.constraints.Email;
@@ -17,5 +18,6 @@ public class UserRequestDTO {
     @Email(message = "INVALID_EMAIL_FORMAT")
     String email;
     String fullname;
+    LocalDate birthday;
     List<String> roles;
 }

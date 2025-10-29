@@ -1,5 +1,6 @@
 package com.tytran.blog.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +40,9 @@ public class Users {
 
     @Column(name="fullname", nullable = true)
     private String fullname;
+
+    @Column(name = "birthday")
+    private LocalDate birthday;
 
     @Column(name="created_at")
     private LocalDateTime created_at;

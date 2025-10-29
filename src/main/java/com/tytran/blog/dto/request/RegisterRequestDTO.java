@@ -1,5 +1,9 @@
 package com.tytran.blog.dto.request;
 
+import java.time.LocalDate;
+
+import com.tytran.blog.validator.BirthdayConstraint;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -21,11 +25,14 @@ public class RegisterRequestDTO {
     String email;
 
     @Size(min = 7, message = "INVALID_PASSWORD")
-    @NotEmpty(message = "Password must not be null or empty")
-    @NotNull(message = "Password must not be null or empty")
+    @NotEmpty(message = "PASSWORD_NOT_NULL")
+    @NotNull(message = "PASSWORD_NOT_NULL")
     String password;
 
     @NotEmpty(message = "Fullname must not be null or empty")
     @NotNull(message = "Fullname must not be null or empty")
     String fullname;
+
+    @BirthdayConstraint(min = 18, message = "INVALID_BIRTHDAY")
+    LocalDate birthday;
 }

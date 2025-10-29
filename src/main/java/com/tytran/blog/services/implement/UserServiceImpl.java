@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Users findByEmail(String email) {
-        return userDAO.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+        return userDAO.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Override
@@ -56,7 +56,7 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
-        Set<Role> role = roleRepository.findByName(com.tytran.blog.enums.Role.ADMIN.name());
+        Set<Role> role = roleRepository.findByName(com.tytran.blog.enums.Role.USER.name());
 
         Users user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -77,12 +77,7 @@ public class UserServiceImpl implements UserService {
         if (userContext != userId) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
-        if (request.getEmail() != null && !request.getEmail().isEmpty()) {
-            userId.setEmail(request.getEmail());
-        }
-        if (request.getFullname() != null && !request.getFullname().isEmpty()) {
-            userId.setFullname(request.getFullname());
-        }
+        userMapper.updateToUser(request, userId);
         userId.setUpdated_at(LocalDateTime.now());
         List<Role> roles = roleRepository.findAllByNameIn(request.getRoles());
         userId.setRoles(new HashSet<>(roles));

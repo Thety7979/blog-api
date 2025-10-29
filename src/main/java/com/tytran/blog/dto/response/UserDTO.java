@@ -1,5 +1,6 @@
 package com.tytran.blog.dto.response;
 
+import java.time.LocalDate;
 import java.util.Set;
 import java.util.UUID;
 
@@ -19,5 +20,6 @@ public class UserDTO {
     UUID id;
     String email;
     String fullname;
+    LocalDate birthday;
     Set<RoleResponseDTO> roles;
 }
