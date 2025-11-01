@@ -8,6 +8,10 @@ import com.tytran.blog.dto.response.PostResponseDTO;
 
 public interface PostService {
     PostResponseDTO create(PostRequestDTO requestDTO);
+
     List<PostResponseDTO> getAllPost();
+
     Boolean delete(UUID id);
+
+    PostResponseDTO update(UUID id, PostRequestDTO requestDTO);
 }

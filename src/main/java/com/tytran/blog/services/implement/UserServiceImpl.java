@@ -3,6 +3,7 @@ package com.tytran.blog.services.implement;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -70,11 +71,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO updateUser(UUID id, UserRequestDTO request) {
-        var context = SecurityContextHolder.getContext().getAuthentication().getName();
-        Users userContext = userDAO.findByEmail(context).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        userContext.getId();
+        var context = SecurityContextHolder.getContext().getAuthentication();
+        Users userContext = userDAO.findByEmail(context.getName()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         Users userId = userDAO.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        if (userContext != userId) {
+        if (!Objects.equals(userContext.getId(), userId.getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         userMapper.updateToUser(request, userId);

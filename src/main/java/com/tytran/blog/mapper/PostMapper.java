@@ -2,6 +2,7 @@ package com.tytran.blog.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import com.tytran.blog.dto.request.PostRequestDTO;
 import com.tytran.blog.dto.response.PostResponseDTO;
@@ -16,4 +17,8 @@ public interface PostMapper {
 
     @Mapping(source = "post.user.fullname", target = "authorName")
     PostResponseDTO toDTO(Posts post);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    void updatePost(@MappingTarget Posts post, PostRequestDTO requestDTO);
 }
