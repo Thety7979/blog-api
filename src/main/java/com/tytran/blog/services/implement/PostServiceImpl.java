@@ -78,4 +78,10 @@ public class PostServiceImpl implements PostService {
         return postMapper.toDTO(post);
     }
 
+    @Override
+    public PostResponseDTO getPostById(UUID id) {
+        Posts post = postRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+        return postMapper.toDTO(post);
+    }
+
 }

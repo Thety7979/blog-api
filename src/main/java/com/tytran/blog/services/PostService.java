@@ -14,4 +14,6 @@ public interface PostService {
     Boolean delete(UUID id);
 
     PostResponseDTO update(UUID id, PostRequestDTO requestDTO);
+
+    PostResponseDTO getPostById(UUID id);
 }

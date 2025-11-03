@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 
-
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -42,7 +41,6 @@ public class PostController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<PostResponseDTO>>> getAllPost() {
         ApiResponse<List<PostResponseDTO>> response = new ApiResponse<>();
         response.setResult(postService.getAllPost());
@@ -59,9 +57,17 @@ public class PostController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<PostResponseDTO>> update(@PathVariable UUID id, @RequestBody PostRequestDTO requestDTO) {
+    public ResponseEntity<ApiResponse<PostResponseDTO>> update(@PathVariable UUID id,
+            @RequestBody PostRequestDTO requestDTO) {
         ApiResponse<PostResponseDTO> response = new ApiResponse<>();
         response.setResult(postService.update(id, requestDTO));
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<PostResponseDTO>> getPostById(@PathVariable UUID id) {
+        ApiResponse<PostResponseDTO> response = new ApiResponse<>();
+        response.setResult(postService.getPostById(id));
         return ResponseEntity.ok().body(response);
     }
 
