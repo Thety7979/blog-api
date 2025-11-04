@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,7 +41,6 @@ public class PostController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<PostResponseDTO>>> getAllPost() {
         ApiResponse<List<PostResponseDTO>> response = new ApiResponse<>();
         response.setResult(postService.getAllPost());
@@ -52,6 +52,22 @@ public class PostController {
     public ResponseEntity<ApiResponse<Boolean>> delete(@PathVariable UUID id) {
         ApiResponse<Boolean> response = new ApiResponse<>();
         response.setResult(postService.delete(id));
+        return ResponseEntity.ok().body(response);
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<PostResponseDTO>> update(@PathVariable UUID id,
+            @RequestBody PostRequestDTO requestDTO) {
+        ApiResponse<PostResponseDTO> response = new ApiResponse<>();
+        response.setResult(postService.update(id, requestDTO));
+        return ResponseEntity.ok().body(response);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<PostResponseDTO>> getPostById(@PathVariable UUID id) {
+        ApiResponse<PostResponseDTO> response = new ApiResponse<>();
+        response.setResult(postService.getPostById(id));
         return ResponseEntity.ok().body(response);
     }
 

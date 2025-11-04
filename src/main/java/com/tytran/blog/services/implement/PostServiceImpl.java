@@ -64,4 +64,24 @@ public class PostServiceImpl implements PostService {
         return true;
     }
 
+    @Override
+    public PostResponseDTO update(UUID id, PostRequestDTO requestDTO) {
+        Posts post = postRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+        var context = SecurityContextHolder.getContext().getAuthentication();
+        Users user = userRepository.findByEmail(context.getName())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        if (!Objects.equals(user.getId(), post.getUser().getId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        postMapper.updatePost(post, requestDTO);
+        postRepository.save(post);
+        return postMapper.toDTO(post);
+    }
+
+    @Override
+    public PostResponseDTO getPostById(UUID id) {
+        Posts post = postRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+        return postMapper.toDTO(post);
+    }
+
 }
