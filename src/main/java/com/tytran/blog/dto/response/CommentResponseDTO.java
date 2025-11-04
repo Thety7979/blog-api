@@ -1,7 +1,7 @@
 package com.tytran.blog.dto.response;
 
-import java.util.List;
-import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -15,10 +15,9 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PostResponseDTO {
-    UUID id;
-    String name;
+@JsonInclude(value = Include.NON_NULL)
+public class CommentResponseDTO {
     String content;
-    String authorName;
-    List<CommentResponseDTO> comments;
+    String postName;
+    String userName;
 }

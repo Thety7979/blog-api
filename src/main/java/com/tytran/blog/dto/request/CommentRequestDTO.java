@@ -1,7 +1,4 @@
-package com.tytran.blog.dto.response;
-
-import java.util.List;
-import java.util.UUID;
+package com.tytran.blog.dto.request;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -15,10 +12,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PostResponseDTO {
-    UUID id;
-    String name;
+public class CommentRequestDTO {
     String content;
-    String authorName;
-    List<CommentResponseDTO> comments;
+    String postName;
 }
