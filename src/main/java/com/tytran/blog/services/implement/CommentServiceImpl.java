@@ -1,5 +1,9 @@
 package com.tytran.blog.services.implement;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -45,6 +49,25 @@ public class CommentServiceImpl implements CommentService {
         comment.setUser(user);
         commentRepository.save(comment);
         return commentMapper.toDTO(comment);
+    }
+
+    @Override
+    public List<CommentResponseDTO> getAllComment() {
+        return commentRepository.findAll().stream().map(commentMapper::toDTO).toList();
+    }
+
+    @Override
+    public Boolean delete(UUID id) {
+        var context = SecurityContextHolder.getContext().getAuthentication();
+        Users user = userRepository.findByEmail(context.getName())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        Comments comments = commentRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+        if (!Objects.equals(user.getId(), comments.getUser().getId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        commentRepository.delete(comments);
+        return true;
     }
 
 }
