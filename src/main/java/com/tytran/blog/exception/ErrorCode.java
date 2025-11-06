@@ -22,7 +22,8 @@ public enum ErrorCode {
     ROLE_EXISTS(1011, "Role exists", HttpStatus.BAD_REQUEST),
     PERMISSION_NOT_EXISTS(1012, "Permission not exists", HttpStatus.BAD_REQUEST),
     INVALID_BIRTHDAY(1013, "You must be at least {min} years old to register", HttpStatus.BAD_REQUEST),
-    POST_NOT_FOUND(1014, "Post not found", HttpStatus.NOT_FOUND)
+    POST_NOT_FOUND(1014, "Post not found", HttpStatus.NOT_FOUND),
+    COMMENT_NOT_FOUND(1015, "Comment not found", HttpStatus.BAD_REQUEST)
     ;
 
     private int code;
