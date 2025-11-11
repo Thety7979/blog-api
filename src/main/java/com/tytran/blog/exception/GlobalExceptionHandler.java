@@ -79,7 +79,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<ErrorCode>> handlingDataIntegrityViolationException(
             DataIntegrityViolationException exception) {
-        ErrorCode errorCode = ErrorCode.ROLE_EXISTS;
+        ErrorCode errorCode = ErrorCode.FK_CONSTRAINT_VIOLATION;
         ApiResponse<ErrorCode> response = new ApiResponse<>();
         response.setCode(errorCode.getCode());
         response.setMessage(errorCode.getMessage());

@@ -10,13 +10,16 @@ import java.util.UUID;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tytran.blog.repository.*;
+import com.tytran.blog.services.UserCleanupService;
 import com.tytran.blog.services.UserService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 import com.tytran.blog.dto.request.ChangePasswordRequestDTO;
 import com.tytran.blog.dto.request.RegisterRequestDTO;
@@ -31,6 +34,7 @@ import com.tytran.blog.mapper.UserMapper;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     UserRepository userDAO;
@@ -40,6 +44,8 @@ public class UserServiceImpl implements UserService {
     PasswordEncoder passwordEncoder;
 
     RoleRepository roleRepository;
+
+    UserCleanupService userCleanupService;
 
     @Override
     public Users findByEmail(String email) {
@@ -71,25 +77,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO updateUser(UUID id, UserRequestDTO request) {
-        var context = SecurityContextHolder.getContext().getAuthentication();
-        Users userContext = userDAO.findByEmail(context.getName()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         Users userId = userDAO.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        if (!Objects.equals(userContext.getId(), userId.getId())) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
+        authorizeUserAction(id);
         userMapper.updateToUser(request, userId);
         userId.setUpdated_at(LocalDateTime.now());
-        List<Role> roles = roleRepository.findAllByNameIn(request.getRoles());
-        userId.setRoles(new HashSet<>(roles));
+        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+            List<Role> roles = roleRepository.findAllByNameIn(request.getRoles());
+            userId.setRoles(new HashSet<>(roles));
+        }
         userId = userDAO.save(userId);
-
         return userMapper.userToUserDTO(userId);
     }
 
     @Override
+    @Transactional
     public boolean deleteUser(UUID userId) {
         Users user = userDAO.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        authorizeUserAction(userId);
+        userCleanupService.cleanupUserData(userId);
         userDAO.delete(user);
         return true;
     }
@@ -141,4 +147,13 @@ public class UserServiceImpl implements UserService {
         return userMapper.userToUserDTO(user);
     }
 
+    private void authorizeUserAction(UUID userIdTarget) {
+        var userContext = SecurityContextHolder.getContext().getAuthentication();
+        Users users = userDAO.findByEmail(userContext.getName())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        if (!Objects.equals(userIdTarget, users.getId()) && users.getRoles().stream()
+                .noneMatch(r -> r.getName().equalsIgnoreCase(com.tytran.blog.enums.Role.ADMIN.name()))) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+    }
 }

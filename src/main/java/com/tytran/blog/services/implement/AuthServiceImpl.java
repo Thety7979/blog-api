@@ -98,7 +98,7 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         Boolean isPasswordMatch = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if (!isPasswordMatch) {
-            throw new AppException(ErrorCode.PASSWORD_NOT_TRUE);
+            throw new AppException(ErrorCode.EMAIL_OR_PASSWORD_NOT_TRUE);
         }
         return AuthResponseDTO.builder()
                 .token(generateToken(user))
