@@ -95,7 +95,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponseDTO Login(AuthRequestDTO request) {
         Users user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.EMAIL_OR_PASSWORD_NOT_TRUE));
         Boolean isPasswordMatch = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if (!isPasswordMatch) {
             throw new AppException(ErrorCode.EMAIL_OR_PASSWORD_NOT_TRUE);

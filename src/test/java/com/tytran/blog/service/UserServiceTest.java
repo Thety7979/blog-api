@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.assertj.core.api.Assertions;
@@ -12,7 +13,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +29,7 @@ import com.tytran.blog.services.UserService;
 @SpringBootTest
 @Transactional
 @TestPropertySource("classpath:test.properties")
+@AutoConfigureMockMvc
 public class UserServiceTest {
 
     @Autowired
@@ -37,6 +41,8 @@ public class UserServiceTest {
     private RegisterRequestDTO request;
 
     private Users user;
+
+    private Users userOther;
 
     private LocalDate birthday;
 
@@ -56,6 +62,13 @@ public class UserServiceTest {
                 .id(UUID.fromString("7001a230-d877-4ddf-a0b0-917f262f765c"))
                 .email("thety@gmail.com")
                 .fullname("Trần Thế Ty")
+                .birthday(birthday)
+                .build();
+
+        userOther = Users.builder()
+                .id(UUID.fromString("7001a230-d877-4ddf-a0b0-917f262f765d"))
+                .email("thety2005@gmail.com")
+                .fullname("Trần Thế Tý")
                 .birthday(birthday)
                 .build();
     }
@@ -85,4 +98,73 @@ public class UserServiceTest {
         Assertions.assertThat(exception.getErrorCode().getMessage()).isEqualTo("User existed");
     }
 
+    @Test
+    @WithMockUser(username = "thety@gmail.com")
+    void me_valid_success() {
+        Mockito.when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+
+        var response = userService.me();
+
+        Assertions.assertThat(response.getEmail()).isEqualTo("thety@gmail.com");
+        Assertions.assertThat(response.getFullname()).isEqualTo("Trần Thế Ty");
+    }
+
+    @Test
+    @WithMockUser(username = "thety@gmail.com")
+    void me_invalid_failure() {
+        Mockito.when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        var response = assertThrows(AppException.class, () -> userService.me());
+
+        Assertions.assertThat(response.getErrorCode().getCode()).isEqualTo(1004);
+        Assertions.assertThat(response.getErrorCode().getMessage()).isEqualTo("User not found");
+    }
+
+    @Test
+    @WithMockUser("thety@gmail.com")
+    void getUserById_valid_success() {
+        Mockito.when(userRepository.findById(any())).thenReturn(Optional.of(user));
+        Mockito.when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+
+        var response = userService.getUserById(user.getId());
+
+        Assertions.assertThat(response.getEmail()).isEqualTo("thety@gmail.com");
+        Assertions.assertThat(response.getFullname()).isEqualTo("Trần Thế Ty");
+    }
+
+    @Test
+    @WithMockUser("thety@gmail.com")
+    void getUserById_invalidFindByEmail_failure() {
+        Mockito.when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        var response = assertThrows(AppException.class, () -> userService.getUserById(user.getId()));
+
+        Assertions.assertThat(response.getErrorCode().getCode()).isEqualTo(1004);
+        Assertions.assertThat(response.getErrorCode().getMessage()).isEqualTo("User not found");
+    }
+
+    @Test
+    @WithMockUser("thety@gmail.com")
+    void getUserById_invalidFindById_failure() {
+        Mockito.when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        Mockito.when(userRepository.findById(any())).thenReturn(Optional.empty());
+
+        var response = assertThrows(AppException.class, () -> userService.getUserById(user.getId()));
+
+        Assertions.assertThat(response.getErrorCode().getCode()).isEqualTo(1004);
+        Assertions.assertThat(response.getErrorCode().getMessage()).isEqualTo("User not found");
+    }
+
+    @Test
+    @WithMockUser("thety@gmail.com")
+    void getUserById_unauthorized_failure() {
+
+        Mockito.when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+        Mockito.when(userRepository.findById(any())).thenReturn(Optional.of(userOther));
+
+        var response = assertThrows(AppException.class, () -> userService.getUserById(userOther.getId()));
+
+        Assertions.assertThat(response.getErrorCode().getCode()).isEqualTo(1008);
+        Assertions.assertThat(response.getErrorCode().getMessage()).isEqualTo("Permission denied");
+    }
 }

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.5.6</version>
+		<version>3.5.7</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.tytran</groupId>
@@ -76,7 +76,6 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.7.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.flywaydb</groupId>
@@ -126,6 +125,12 @@
 			<version>2.4.240</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<version>7.0.0-RC3</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -156,6 +161,38 @@
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 						</exclude>
+					</excludes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>test</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<excludes>
+						<exclude>com/tytran/blog/config/**</exclude>
+						<exclude>com/tytran/blog/dto/**</exclude>
+						<exclude>com/tytran/blog/entity/**</exclude>
+						<!-- <exclude>com/tytran/blog/enums/**</exclude> -->
+						<!-- <exclude>com/tytran/blog/exception/**</exclude> -->
+						<exclude>com/tytran/blog/mapper/**</exclude>
+						<!-- <exclude>com/tytran/blog/repository/**</exclude> -->
+						<exclude>com/tytran/blog/scheduler/**</exclude>
+						<exclude>com/tytran/blog/validator/**</exclude>
 					</excludes>
 				</configuration>
 			</plugin>
