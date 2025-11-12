@@ -37,7 +37,7 @@ import com.tytran.blog.mapper.UserMapper;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    UserRepository userDAO;
+    UserRepository userRepository;
 
     UserMapper userMapper;
 
@@ -49,17 +49,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Users findByEmail(String email) {
-        return userDAO.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
     }
 
     @Override
     public boolean existsByEmail(String email) {
-        return userDAO.findByEmail(email).isPresent();
+        return userRepository.findByEmail(email).isPresent();
     }
 
     @Override
     public UserDTO saveUser(RegisterRequestDTO request) {
-        if (userDAO.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
 
@@ -70,14 +70,14 @@ public class UserServiceImpl implements UserService {
         user.setCreated_at(LocalDateTime.now());
         user.setUpdated_at(LocalDateTime.now());
         user.setRoles(role);
-        user = userDAO.save(user);
+        user = userRepository.save(user);
 
         return userMapper.userToUserDTO(user);
     }
 
     @Override
     public UserDTO updateUser(UUID id, UserRequestDTO request) {
-        Users userId = userDAO.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        Users userId = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         authorizeUserAction(id);
         userMapper.updateToUser(request, userId);
         userId.setUpdated_at(LocalDateTime.now());
@@ -85,35 +85,34 @@ public class UserServiceImpl implements UserService {
             List<Role> roles = roleRepository.findAllByNameIn(request.getRoles());
             userId.setRoles(new HashSet<>(roles));
         }
-        userId = userDAO.save(userId);
+        userId = userRepository.save(userId);
         return userMapper.userToUserDTO(userId);
     }
 
     @Override
     @Transactional
     public boolean deleteUser(UUID userId) {
-        Users user = userDAO.findById(userId)
+        Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         authorizeUserAction(userId);
         userCleanupService.cleanupUserData(userId);
-        userDAO.delete(user);
+        userRepository.delete(user);
         return true;
     }
 
     @Override
     public List<UserDTO> getAllUsers() {
-        List<Users> users = userDAO.findAll();
+        List<Users> users = userRepository.findAll();
         return users.stream().map(user -> userMapper.userToUserDTO(user)).toList();
     }
 
     @Override
     public UserDTO getUserById(UUID userid) {
-        var securityContext = SecurityContextHolder.getContext();
-        String context = securityContext.getAuthentication().getName();
-        Users userId = userDAO.findById(userid).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        Users userContext = userDAO.findByEmail(context).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        userContext.getId();
-        if (userId != userContext) {
+        var securityContext = SecurityContextHolder.getContext().getAuthentication();
+        Users userContext = userRepository.findByEmail(securityContext.getName())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        Users userId = userRepository.findById(userid).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        if (userId.getId() != userContext.getId()) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         return userMapper.userToUserDTO(userId);
@@ -123,13 +122,13 @@ public class UserServiceImpl implements UserService {
     public UserDTO changePassword(ChangePasswordRequestDTO request) {
         var securityContext = SecurityContextHolder.getContext();
         String name = securityContext.getAuthentication().getName();
-        Users user = userDAO.findByEmail(name).orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
+        Users user = userRepository.findByEmail(name).orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
         if (request.getCurrentPassword() != null && !request.getCurrentPassword().isEmpty()) {
             boolean isPasswordMatch = passwordEncoder.matches(request.getCurrentPassword(), user.getPassword());
             if (isPasswordMatch) {
                 user.setPassword(passwordEncoder.encode(request.getNewPassword()));
                 user.setUpdated_at(LocalDateTime.now());
-                userDAO.save(user);
+                userRepository.save(user);
             } else {
                 throw new AppException(ErrorCode.PASSWORD_NOT_TRUE);
             }
@@ -143,13 +142,13 @@ public class UserServiceImpl implements UserService {
     public UserDTO me() {
         var securityContextHolder = SecurityContextHolder.getContext();
         String name = securityContextHolder.getAuthentication().getName();
-        Users user = userDAO.findByEmail(name).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        Users user = userRepository.findByEmail(name).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.userToUserDTO(user);
     }
 
     private void authorizeUserAction(UUID userIdTarget) {
         var userContext = SecurityContextHolder.getContext().getAuthentication();
-        Users users = userDAO.findByEmail(userContext.getName())
+        Users users = userRepository.findByEmail(userContext.getName())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         if (!Objects.equals(userIdTarget, users.getId()) && users.getRoles().stream()
                 .noneMatch(r -> r.getName().equalsIgnoreCase(com.tytran.blog.enums.Role.ADMIN.name()))) {
