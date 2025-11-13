@@ -47,7 +47,7 @@ public class UserControllerIntegrationTest {
         LocalDate birthday = LocalDate.of(2005, 11, 22);
 
         request = RegisterRequestDTO.builder()
-                .email("thety125@gmail.com")
+                .email("thety126@gmail.com")
                 .password("12345678")
                 .fullname("Trần Thế Ty")
                 .birthday(birthday)
@@ -66,12 +66,11 @@ public class UserControllerIntegrationTest {
 
         String content = objectMapper.writeValueAsString(request);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(content))
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(content))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("code").value(1000))
-                .andExpect(MockMvcResultMatchers.jsonPath("result.email").value("thety125@gmail.com"));
+                .andExpect(MockMvcResultMatchers.jsonPath("result.email").value("thety126@gmail.com"));
     }
 }

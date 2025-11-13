@@ -1,7 +1,6 @@
 package com.tytran.blog.config;
 
 import java.util.Objects;
-
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +34,8 @@ public class CustomJwtDecoder implements JwtDecoder {
     @Override
     public Jwt decode(String token) throws JwtException {
         try {
-            var introspect = authService.introspect(IntrospectRequestDTO.builder()
-                    .token(token)
-                    .build());
+            var introspect = authService.introspect(
+                    IntrospectRequestDTO.builder().token(token).build());
             if (!introspect.getValid()) {
                 throw new JwtException(token);
             }
@@ -46,12 +44,10 @@ public class CustomJwtDecoder implements JwtDecoder {
         }
         if (Objects.isNull(nimbusJwtDecoder)) {
             SecretKeySpec secretKeySpec = new SecretKeySpec(SIGNER_KEY.getBytes(), "HS512");
-            nimbusJwtDecoder = NimbusJwtDecoder
-                    .withSecretKey(secretKeySpec)
+            nimbusJwtDecoder = NimbusJwtDecoder.withSecretKey(secretKeySpec)
                     .macAlgorithm(MacAlgorithm.HS512)
                     .build();
         }
         return nimbusJwtDecoder.decode(token);
     }
-
 }

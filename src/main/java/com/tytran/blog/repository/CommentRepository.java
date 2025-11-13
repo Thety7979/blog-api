@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tytran.blog.entity.Comments;
 
 @Repository
-public interface CommentRepository extends JpaRepository<Comments, UUID>{
+public interface CommentRepository extends JpaRepository<Comments, UUID> {
 
     @Transactional
     @Modifying

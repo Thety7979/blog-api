@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tytran.blog.entity.Posts;
 
 @Repository
-public interface PostRepository extends JpaRepository<Posts, UUID>{
+public interface PostRepository extends JpaRepository<Posts, UUID> {
     Optional<Posts> findByName(String name);
 
     @Transactional

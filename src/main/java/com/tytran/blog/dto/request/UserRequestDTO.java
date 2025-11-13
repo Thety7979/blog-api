@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.validation.constraints.Email;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +18,7 @@ import lombok.experimental.FieldDefaults;
 public class UserRequestDTO {
     @Email(message = "INVALID_EMAIL_FORMAT")
     String email;
+
     String fullname;
     LocalDate birthday;
     List<String> roles;

@@ -16,7 +16,7 @@ import lombok.experimental.FieldDefaults;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UserCleanupServiceImpl implements UserCleanupService{
+public class UserCleanupServiceImpl implements UserCleanupService {
 
     PostRepository postRepository;
 
@@ -28,5 +28,4 @@ public class UserCleanupServiceImpl implements UserCleanupService{
         commentRepository.deleteCommentByUserId(userId);
         postRepository.deletePostByUserId(userId);
     }
-    
 }

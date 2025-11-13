@@ -8,8 +8,6 @@ import org.springframework.test.context.TestPropertySource;
 @TestPropertySource("classpath:test.properties")
 class BlogApplicationTests {
 
-	@Test
-	void contextLoads() {
-	}
-
+    @Test
+    void contextLoads() {}
 }

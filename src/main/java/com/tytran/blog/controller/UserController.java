@@ -1,5 +1,18 @@
 package com.tytran.blog.controller;
 
+import java.util.List;
+import java.util.UUID;
+
+import jakarta.validation.Valid;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -9,22 +22,10 @@ import com.tytran.blog.dto.request.UserRequestDTO;
 import com.tytran.blog.dto.response.UserDTO;
 import com.tytran.blog.services.UserService;
 
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
-import java.util.UUID;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/user")
@@ -45,8 +46,8 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<UserDTO>> updateUser(@PathVariable UUID id,
-            @RequestBody @Valid UserRequestDTO requestDTO) {
+    public ResponseEntity<ApiResponse<UserDTO>> updateUser(
+            @PathVariable UUID id, @RequestBody @Valid UserRequestDTO requestDTO) {
         ApiResponse<UserDTO> response = new ApiResponse<>();
         response.setResult(userService.updateUser(id, requestDTO));
         return ResponseEntity.ok(response);
@@ -80,5 +81,4 @@ public class UserController {
         response.setResult(userService.me());
         return ResponseEntity.ok().body(response);
     }
-
 }

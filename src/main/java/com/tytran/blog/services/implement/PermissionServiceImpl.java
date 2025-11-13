@@ -42,10 +42,9 @@ public class PermissionServiceImpl implements PermissionService {
 
     @Override
     public Boolean delete(UUID id) {
-        Permission permission = permissionRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
+        Permission permission =
+                permissionRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND));
         permissionRepository.delete(permission);
         return true;
     }
-
 }

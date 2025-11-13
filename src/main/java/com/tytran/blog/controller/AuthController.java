@@ -1,5 +1,12 @@
 package com.tytran.blog.controller;
 
+import java.text.ParseException;
+
+import jakarta.validation.Valid;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,16 +23,9 @@ import com.tytran.blog.dto.response.RefreshTokenResponseDTO;
 import com.tytran.blog.dto.response.UserDTO;
 import com.tytran.blog.services.AuthService;
 
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-
-import java.text.ParseException;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/auth")
@@ -72,5 +72,4 @@ public class AuthController {
         response.setResult(authService.refreshToken(requestDTO));
         return ResponseEntity.ok().body(response);
     }
-
 }

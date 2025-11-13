@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -38,16 +39,16 @@ public class Users {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name="fullname", nullable = true)
+    @Column(name = "fullname", nullable = true)
     private String fullname;
 
     @Column(name = "birthday")
     private LocalDate birthday;
 
-    @Column(name="created_at")
+    @Column(name = "created_at")
     private LocalDateTime created_at;
 
-    @Column(name="updated_at")
+    @Column(name = "updated_at")
     private LocalDateTime updated_at;
 
     @ManyToMany(fetch = FetchType.LAZY)

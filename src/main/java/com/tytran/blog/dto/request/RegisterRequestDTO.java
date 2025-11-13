@@ -2,12 +2,13 @@ package com.tytran.blog.dto.request;
 
 import java.time.LocalDate;
 
-import com.tytran.blog.validator.BirthdayConstraint;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+import com.tytran.blog.validator.BirthdayConstraint;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
