@@ -42,7 +42,7 @@ public class InitService {
 
     public void createUserAdmin() {
         if (userRepository.findByEmail(ADMIN_EMAIL).isEmpty()) {
-            List<Role> role = roleRepository.findAllByNameIn(List.of("ADMIN"));
+            List<Role> role = roleRepository.findAllByNameIn(List.of(com.tytran.blog.enums.Role.ADMIN.name()));
             Users user = Users.builder()
                     .email(ADMIN_EMAIL)
                     .password(passwordEncoder.encode(ADMIN_PASSWORD))
