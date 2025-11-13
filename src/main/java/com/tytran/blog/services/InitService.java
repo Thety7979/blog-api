@@ -1,5 +1,6 @@
 package com.tytran.blog.services;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -35,13 +36,18 @@ public class InitService {
     @Value("${admin.password}")
     protected String ADMIN_PASSWORD;
 
+    @NonFinal
+    @Value("${admin.email}")
+    protected String ADMIN_EMAIL;
+
     public void createUserAdmin() {
-        if (userRepository.findByEmail("admin@gmail.com").isEmpty()) {
+        if (userRepository.findByEmail(ADMIN_EMAIL).isEmpty()) {
             List<Role> role = roleRepository.findAllByNameIn(List.of("ADMIN"));
             Users user = Users.builder()
-                    .email("admin@gmail.com")
+                    .email(ADMIN_EMAIL)
                     .password(passwordEncoder.encode(ADMIN_PASSWORD))
                     .fullname("Admin")
+                    .birthday(LocalDate.of(2005, 11, 22))
                     .created_at(LocalDateTime.now())
                     .updated_at(LocalDateTime.now())
                     .roles(new HashSet<>(role))

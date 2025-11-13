@@ -27,4 +27,5 @@ jwt:
   valid-duration: ${VALID_DURATION}
   refreshable-duration: ${REFRESHABLE_DURATION}
 admin:
+  email: ${ADMIN_EMAIL}
   password: ${ADMIN_PASSWORD}
