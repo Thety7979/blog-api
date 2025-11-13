@@ -87,14 +87,13 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             isvalid = false;
         }
-        return IntrospectResponseDTO.builder()
-                .valid(isvalid)
-                .build();
+        return IntrospectResponseDTO.builder().valid(isvalid).build();
     }
 
     @Override
     public AuthResponseDTO Login(AuthRequestDTO request) {
-        Users user = userRepository.findByEmail(request.getEmail())
+        Users user = userRepository
+                .findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_OR_PASSWORD_NOT_TRUE));
         Boolean isPasswordMatch = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if (!isPasswordMatch) {
@@ -125,14 +124,19 @@ public class AuthServiceImpl implements AuthService {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
         Date expiryTime = (isRefresh)
-                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime().toInstant()
-                        .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS).toEpochMilli())
+                ? new Date(signedJWT
+                        .getJWTClaimsSet()
+                        .getIssueTime()
+                        .toInstant()
+                        .plus(REFRESHABLE_DURATION, ChronoUnit.SECONDS)
+                        .toEpochMilli())
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
         var verified = signedJWT.verify(verifier);
         if (!verified || expiryTime.before(new Date())) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
-        Boolean checkExists = invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID());
+        Boolean checkExists = invalidatedTokenRepository.existsById(
+                signedJWT.getJWTClaimsSet().getJWTID());
         if (checkExists) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
@@ -182,17 +186,12 @@ public class AuthServiceImpl implements AuthService {
         var signedToken = verifyToken(request.getToken(), true);
         var jwtId = signedToken.getJWTClaimsSet().getJWTID();
         var expiryTime = signedToken.getJWTClaimsSet().getExpirationTime();
-        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
-                .id(jwtId)
-                .expiryTime(expiryTime)
-                .build();
+        InvalidatedToken invalidatedToken =
+                InvalidatedToken.builder().id(jwtId).expiryTime(expiryTime).build();
         invalidatedTokenRepository.save(invalidatedToken);
         String email = signedToken.getJWTClaimsSet().getSubject();
         Users user = userService.findByEmail(email);
         String refreshToken = generateToken(user);
-        return RefreshTokenResponseDTO.builder()
-                .Token(refreshToken)
-                .build();
+        return RefreshTokenResponseDTO.builder().Token(refreshToken).build();
     }
-
 }

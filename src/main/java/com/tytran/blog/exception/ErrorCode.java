@@ -25,8 +25,7 @@ public enum ErrorCode {
     INVALID_BIRTHDAY(1013, "You must be at least {min} years old to register", HttpStatus.BAD_REQUEST),
     POST_NOT_FOUND(1014, "Post not found", HttpStatus.NOT_FOUND),
     COMMENT_NOT_FOUND(1015, "Comment not found", HttpStatus.BAD_REQUEST),
-    FK_CONSTRAINT_VIOLATION(1016, "Operation failed due to foreign key constraint violation", HttpStatus.CONFLICT)
-    ;
+    FK_CONSTRAINT_VIOLATION(1016, "Operation failed due to foreign key constraint violation", HttpStatus.CONFLICT);
 
     private int code;
     private String message;

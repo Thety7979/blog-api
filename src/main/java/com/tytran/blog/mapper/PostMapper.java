@@ -8,7 +8,9 @@ import com.tytran.blog.dto.request.PostRequestDTO;
 import com.tytran.blog.dto.response.PostResponseDTO;
 import com.tytran.blog.entity.Posts;
 
-@Mapper(componentModel = "spring", uses = {CommentMapper.class})
+@Mapper(
+        componentModel = "spring",
+        uses = {CommentMapper.class})
 public interface PostMapper {
 
     @Mapping(target = "id", ignore = true)

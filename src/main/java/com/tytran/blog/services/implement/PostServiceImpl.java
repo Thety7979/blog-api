@@ -38,7 +38,8 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostResponseDTO create(PostRequestDTO requestDTO) {
         var context = SecurityContextHolder.getContext().getAuthentication();
-        Users user = userRepository.findByEmail(context.getName())
+        Users user = userRepository
+                .findByEmail(context.getName())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         Posts post = postMapper.toPost(requestDTO);
         post.setUser(user);
@@ -54,7 +55,8 @@ public class PostServiceImpl implements PostService {
     @Override
     public Boolean delete(UUID id) {
         var context = SecurityContextHolder.getContext().getAuthentication();
-        Users user = userRepository.findByEmail(context.getName())
+        Users user = userRepository
+                .findByEmail(context.getName())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         Posts post = postRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
         if (!Objects.equals(user.getId(), post.getUser().getId())) {
@@ -68,7 +70,8 @@ public class PostServiceImpl implements PostService {
     public PostResponseDTO update(UUID id, PostRequestDTO requestDTO) {
         Posts post = postRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
         var context = SecurityContextHolder.getContext().getAuthentication();
-        Users user = userRepository.findByEmail(context.getName())
+        Users user = userRepository
+                .findByEmail(context.getName())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         if (!Objects.equals(user.getId(), post.getUser().getId())) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -83,5 +86,4 @@ public class PostServiceImpl implements PostService {
         Posts post = postRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
         return postMapper.toDTO(post);
     }
-
 }

@@ -30,7 +30,13 @@ public interface UserMapper {
     @Mapping(target = "created_at", ignore = true)
     @Mapping(target = "comments", ignore = true)
     @Mapping(target = "password", ignore = true)
-    @Mapping(target = "email", expression = "java(requestDTO.getEmail() != null && !requestDTO.getEmail().isBlank() ? requestDTO.getEmail() : user.getEmail())")
-    @Mapping(target = "fullname", expression = "java(requestDTO.getFullname() != null && !requestDTO.getFullname().isBlank() ? requestDTO.getFullname() : user.getFullname())")
+    @Mapping(
+            target = "email",
+            expression =
+                    "java(requestDTO.getEmail() != null && !requestDTO.getEmail().isBlank() ? requestDTO.getEmail() : user.getEmail())")
+    @Mapping(
+            target = "fullname",
+            expression =
+                    "java(requestDTO.getFullname() != null && !requestDTO.getFullname().isBlank() ? requestDTO.getFullname() : user.getFullname())")
     void updateToUser(UserRequestDTO requestDTO, @MappingTarget Users user);
 }

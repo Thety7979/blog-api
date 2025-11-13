@@ -8,6 +8,8 @@ import com.tytran.blog.dto.response.PermissionResponseDTO;
 
 public interface PermissionService {
     PermissionResponseDTO save(PermissionRequestDTO requestDTO);
+
     List<PermissionResponseDTO> getAllPermission();
+
     Boolean delete(UUID id);
 }

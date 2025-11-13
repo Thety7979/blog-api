@@ -15,8 +15,12 @@ import com.tytran.blog.dto.response.UserDTO;
 
 public interface AuthService {
     AuthResponseDTO Login(AuthRequestDTO request);
+
     UserDTO Register(RegisterRequestDTO request);
+
     IntrospectResponseDTO introspect(IntrospectRequestDTO request) throws JOSEException, ParseException;
+
     Boolean Logout(LogoutRequestDTO request) throws JOSEException, ParseException;
+
     RefreshTokenResponseDTO refreshToken(RefreshTokenRequestDTO request) throws JOSEException, ParseException;
 }

@@ -13,7 +13,7 @@ public class BirthdayValidator implements ConstraintValidator<BirthdayConstraint
 
     @Override
     public boolean isValid(LocalDate value, ConstraintValidatorContext context) {
-        if(Objects.isNull(value)){
+        if (Objects.isNull(value)) {
             return true;
         }
 
@@ -27,5 +27,4 @@ public class BirthdayValidator implements ConstraintValidator<BirthdayConstraint
         ConstraintValidator.super.initialize(constraint);
         min = constraint.min();
     }
-
 }

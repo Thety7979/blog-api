@@ -12,15 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tytran.blog.repository.*;
-import com.tytran.blog.services.UserCleanupService;
-import com.tytran.blog.services.UserService;
-
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
-
 import com.tytran.blog.dto.request.ChangePasswordRequestDTO;
 import com.tytran.blog.dto.request.RegisterRequestDTO;
 import com.tytran.blog.dto.request.UserRequestDTO;
@@ -30,6 +21,14 @@ import com.tytran.blog.entity.Users;
 import com.tytran.blog.exception.AppException;
 import com.tytran.blog.exception.ErrorCode;
 import com.tytran.blog.mapper.UserMapper;
+import com.tytran.blog.repository.*;
+import com.tytran.blog.services.UserCleanupService;
+import com.tytran.blog.services.UserService;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -92,8 +91,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public boolean deleteUser(UUID userId) {
-        Users user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        Users user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         authorizeUserAction(userId);
         userCleanupService.cleanupUserData(userId);
         userRepository.delete(user);
@@ -109,7 +107,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO getUserById(UUID userid) {
         var securityContext = SecurityContextHolder.getContext().getAuthentication();
-        Users userContext = userRepository.findByEmail(securityContext.getName())
+        Users userContext = userRepository
+                .findByEmail(securityContext.getName())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         Users userId = userRepository.findById(userid).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         if (userId.getId() != userContext.getId()) {
@@ -123,7 +122,8 @@ public class UserServiceImpl implements UserService {
         var securityContext = SecurityContextHolder.getContext();
         String name = securityContext.getAuthentication().getName();
         Users user = userRepository.findByEmail(name).orElseThrow(() -> new AppException(ErrorCode.UNAUTHORIZED));
-        if (request.getCurrentPassword() != null && !request.getCurrentPassword().isEmpty()) {
+        if (request.getCurrentPassword() != null
+                && !request.getCurrentPassword().isEmpty()) {
             boolean isPasswordMatch = passwordEncoder.matches(request.getCurrentPassword(), user.getPassword());
             if (isPasswordMatch) {
                 user.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -148,10 +148,12 @@ public class UserServiceImpl implements UserService {
 
     private void authorizeUserAction(UUID userIdTarget) {
         var userContext = SecurityContextHolder.getContext().getAuthentication();
-        Users users = userRepository.findByEmail(userContext.getName())
+        Users users = userRepository
+                .findByEmail(userContext.getName())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        if (!Objects.equals(userIdTarget, users.getId()) && users.getRoles().stream()
-                .noneMatch(r -> r.getName().equalsIgnoreCase(com.tytran.blog.enums.Role.ADMIN.name()))) {
+        if (!Objects.equals(userIdTarget, users.getId())
+                && users.getRoles().stream()
+                        .noneMatch(r -> r.getName().equalsIgnoreCase(com.tytran.blog.enums.Role.ADMIN.name()))) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
     }

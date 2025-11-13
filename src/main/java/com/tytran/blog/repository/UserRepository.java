@@ -10,7 +10,8 @@ import org.springframework.stereotype.Repository;
 import com.tytran.blog.entity.Users;
 
 @Repository
-public interface UserRepository extends JpaRepository<Users, UUID>, JpaSpecificationExecutor<Users>{
+public interface UserRepository extends JpaRepository<Users, UUID>, JpaSpecificationExecutor<Users> {
     Optional<Users> findByEmail(String email);
+
     boolean existsByEmail(String email);
 }

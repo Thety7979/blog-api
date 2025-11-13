@@ -70,10 +70,9 @@ public class UserControllerTest {
 
         Mockito.when(authService.Register(ArgumentMatchers.any())).thenReturn(response);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(content))
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(content))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("code").value(1000));
     }
@@ -86,10 +85,9 @@ public class UserControllerTest {
 
         // Mockito.when(authService.Register(ArgumentMatchers.any())).thenReturn(response);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(content))
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(content))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("code").value(1005))
                 .andExpect(MockMvcResultMatchers.jsonPath("message").value("Invalid email format"));
@@ -104,10 +102,9 @@ public class UserControllerTest {
 
         // Mockito.when(authService.Register(ArgumentMatchers.any())).thenReturn(response);
 
-        mockMvc.perform(MockMvcRequestBuilders
-                .post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .content(content))
+        mockMvc.perform(MockMvcRequestBuilders.post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(content))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("code").value(1006))
                 .andExpect(MockMvcResultMatchers.jsonPath("message").value("Password must be at least 7 character"));

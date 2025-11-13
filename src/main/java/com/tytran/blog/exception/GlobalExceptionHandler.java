@@ -3,6 +3,8 @@ package com.tytran.blog.exception;
 import java.util.Map;
 import java.util.Objects;
 
+import jakarta.validation.ConstraintViolation;
+
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -12,7 +14,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.tytran.blog.dto.ApiResponse;
 
-import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 
 @ControllerAdvice
@@ -26,7 +27,8 @@ public class GlobalExceptionHandler {
         ApiResponse<ErrorCode> response = new ApiResponse<>();
         response.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
         response.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
-        return ResponseEntity.status(ErrorCode.UNCATEGORIZED_EXCEPTION.getHttpStatus()).body(response);
+        return ResponseEntity.status(ErrorCode.UNCATEGORIZED_EXCEPTION.getHttpStatus())
+                .body(response);
     }
 
     @ExceptionHandler(value = AppException.class)
@@ -57,16 +59,18 @@ public class GlobalExceptionHandler {
         Map<String, Object> attributes = null;
         try {
             errorCode = ErrorCode.valueOf(enumKey);
-            var constraintViolation = exception.getBindingResult().getAllErrors().getFirst()
-                    .unwrap(ConstraintViolation.class);
+            var constraintViolation =
+                    exception.getBindingResult().getAllErrors().getFirst().unwrap(ConstraintViolation.class);
             attributes = constraintViolation.getConstraintDescriptor().getAttributes();
         } catch (Exception e) {
             errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
         }
         ApiResponse<ErrorCode> response = new ApiResponse<>();
         response.setCode(errorCode.getCode());
-        response.setMessage(Objects.nonNull(attributes) ? mapAttributes(errorCode.getMessage(), attributes)
-                : errorCode.getMessage());
+        response.setMessage(
+                Objects.nonNull(attributes)
+                        ? mapAttributes(errorCode.getMessage(), attributes)
+                        : errorCode.getMessage());
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);
     }
 

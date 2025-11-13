@@ -9,10 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tytran.blog.entity.InvalidatedToken;
 
 @Repository
-public interface InvalidatedTokenRepository extends JpaRepository<InvalidatedToken, String>{
+public interface InvalidatedTokenRepository extends JpaRepository<InvalidatedToken, String> {
 
     @Transactional
     @Modifying
-    @Query(value = "DELETE FROM invalidated_token WHERE expirytime < NOW() - INTERVAL '1 day'", nativeQuery=true)
+    @Query(value = "DELETE FROM invalidated_token WHERE expirytime < NOW() - INTERVAL '1 day'", nativeQuery = true)
     void deleteExpiriedToken();
 }

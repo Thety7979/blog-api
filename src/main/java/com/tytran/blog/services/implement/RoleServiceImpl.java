@@ -3,6 +3,7 @@ package com.tytran.blog.services.implement;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 
 import com.tytran.blog.dto.request.RoleRequestDTO;
@@ -69,5 +70,4 @@ public class RoleServiceImpl implements RoleService {
         role = roleDAO.save(role);
         return roleMapper.toDTO(role);
     }
-
 }
