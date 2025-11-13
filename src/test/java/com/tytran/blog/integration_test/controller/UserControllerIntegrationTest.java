@@ -1,7 +1,6 @@
 package com.tytran.blog.integration_test.controller;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tytran.blog.dto.request.RegisterRequestDTO;
-import com.tytran.blog.dto.response.UserDTO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,8 +37,6 @@ public class UserControllerIntegrationTest {
 
     private RegisterRequestDTO request;
 
-    private UserDTO response;
-
     @BeforeEach
     void initData() {
 
@@ -49,13 +45,6 @@ public class UserControllerIntegrationTest {
         request = RegisterRequestDTO.builder()
                 .email("thety126@gmail.com")
                 .password("12345678")
-                .fullname("Trần Thế Ty")
-                .birthday(birthday)
-                .build();
-
-        response = UserDTO.builder()
-                .id(UUID.randomUUID())
-                .email("thety@gmail.com")
                 .fullname("Trần Thế Ty")
                 .birthday(birthday)
                 .build();
