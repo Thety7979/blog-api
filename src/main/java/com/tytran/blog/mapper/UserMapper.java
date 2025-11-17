@@ -1,8 +1,12 @@
 package com.tytran.blog.mapper;
 
+import java.util.List;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import com.tytran.blog.dto.request.RegisterRequestDTO;
 import com.tytran.blog.dto.request.UserRequestDTO;
@@ -39,4 +43,12 @@ public interface UserMapper {
             expression =
                     "java(requestDTO.getFullname() != null && !requestDTO.getFullname().isBlank() ? requestDTO.getFullname() : user.getFullname())")
     void updateToUser(UserRequestDTO requestDTO, @MappingTarget Users user);
+
+    List<UserDTO> toUserDTOList(List<Users> users);
+
+    default Page<UserDTO> toPage(Page<Users> uPage){
+        List<UserDTO> list = toUserDTOList(uPage.getContent());
+        return new PageImpl<>(list, uPage.getPageable(), uPage.getTotalElements());
+    }
+
 }

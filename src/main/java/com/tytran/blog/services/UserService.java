@@ -3,6 +3,8 @@ package com.tytran.blog.services;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+
 import com.tytran.blog.dto.request.ChangePasswordRequestDTO;
 import com.tytran.blog.dto.request.RegisterRequestDTO;
 import com.tytran.blog.dto.request.UserRequestDTO;
@@ -27,4 +29,6 @@ public interface UserService {
     boolean deleteUser(UUID userId);
 
     UserDTO me();
+
+    Page<UserDTO> search(int pageNum, int pageSize);
 }

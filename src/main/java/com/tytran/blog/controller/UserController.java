@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import jakarta.validation.Valid;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -26,6 +27,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/user")
@@ -81,4 +83,13 @@ public class UserController {
         response.setResult(userService.me());
         return ResponseEntity.ok().body(response);
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<Page<UserDTO>>> search(@RequestParam(name = "pageNum") int pageNum,
+            @RequestParam(name = "pageSize") int pageSize) {
+        ApiResponse<Page<UserDTO>> response = new ApiResponse<>();
+        response.setResult(userService.search(pageNum, pageSize));
+        return ResponseEntity.ok().body(response);
+    }
+
 }

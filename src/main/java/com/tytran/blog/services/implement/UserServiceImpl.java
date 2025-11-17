@@ -7,6 +7,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -58,19 +62,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO saveUser(RegisterRequestDTO request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new AppException(ErrorCode.USER_EXISTED);
-        }
-
         Set<Role> role = roleRepository.findByName(com.tytran.blog.enums.Role.USER.name());
-
         Users user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setCreated_at(LocalDateTime.now());
         user.setUpdated_at(LocalDateTime.now());
         user.setRoles(role);
-        user = userRepository.save(user);
-
+        try {
+            user = userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
         return userMapper.userToUserDTO(user);
     }
 
@@ -156,5 +158,12 @@ public class UserServiceImpl implements UserService {
                         .noneMatch(r -> r.getName().equalsIgnoreCase(com.tytran.blog.enums.Role.ADMIN.name()))) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
+    }
+
+    @Override
+    public Page<UserDTO> search(int pageNum, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNum - 1, pageSize);
+        Page<Users> users = userRepository.findAll(pageable);
+        return userMapper.toPage(users);
     }
 }
