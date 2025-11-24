@@ -1,11 +1,11 @@
 services:
   db:
     image: postgres:17.4
-    container_name: blog-postgres
+    container_name: postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234567890
-      POSTGRES_DB: blog-db
+      POSTGRES_USER: ${DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${DATASOURCE_PASSWORD}
+      POSTGRES_DB: ${DATASOURCE_DB}
     volumes:
       - blog-data:/var/lib/postgresql/data
     ports:
@@ -20,19 +20,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: blog-app
+    container_name: app
     depends_on:
       db:
         condition: service_healthy
     environment:
-      DATASOURCE_URL: jdbc:postgresql://db:5432/blog-db
-      DATASOURCE_USERNAME: postgres
-      DATASOURCE_PASSWORD: 1234567890
-      JWT_SIGNERKEY: 6c2142ecf0065711f0ffb7de9f7060414b767533b653e3b09d338b06b603d697
-      VALID_DURATION: 3600
-      REFRESHABLE_DURATION: 36000
-      ADMIN_PASSWORD: admin
-      ADMIN_EMAIL: admin@gmail.com
+      DATASOURCE_URL: jdbc:postgresql://172.18.0.2:5432/${DATASOURCE_DB}
+      DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
+      DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+      JWT_SIGNERKEY: ${JWT_SIGNERKEY}
+      VALID_DURATION: ${VALID_DURATION}
+      REFRESHABLE_DURATION: ${REFRESHABLE_DURATION}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
     ports:
       - "8080:8080"
 
